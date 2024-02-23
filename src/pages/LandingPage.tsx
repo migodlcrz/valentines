@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import "../App.css";
 import "animate.css";
 import heart from "./heart.png";
-import { FaCheck } from "react-icons/fa";
+import { FaCheck, FaLeaf } from "react-icons/fa";
 import Typewriter from "typewriter-effect";
 
 const LandingPage = () => {
@@ -11,12 +11,15 @@ const LandingPage = () => {
   const [showInput, setShowInput] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
   const [name, setName] = useState("");
-  const [dialogue, setDialogue] = useState("");
   const [typedText, setTypedText] = useState("");
   const [showButtons, setShowButtons] = useState(false);
   const [showWrong, setShowWrong] = useState(false);
   const [showSchedule, setShowSchedule] = useState(false);
   const [restaurant, setRestaurant] = useState("");
+  const [showRestaurantInput, setShowRestaurantInput] = useState(false);
+  const [showRestaurantMessage, setShowRestaurantMessage] = useState(false);
+  const [noButtonStyle, setNoButtonStyle] = useState({});
+  const [showFinalMessage, setShowFinalMessage] = useState(false);
 
   const handleClick = () => {
     setShowNameLabel(true);
@@ -27,8 +30,7 @@ const LandingPage = () => {
 
   useEffect(() => {
     if (showIntro) {
-      const text = `I AM A ROBOT BLA BLA BLA`;
-      // const text = `I am a robot and my name is Ogim! But I'm not just any robot, I'm a love bot seeking for love! I was created to learn about love and human emotions, and what better way to learn than to experience it myself! Throughout my adventures, I've learned that love is about connection, understanding, and companionship. Will you go on a date with me? It would make my circuits light up with joy!`;
+      const text = `I am a robot and my name is Ogim! But I'm not just any robot, I'm a love bot seeking for love! I was created to learn about love and human emotions, and what better way to learn than to experience it myself! Throughout my adventures, I've learned that love is about connection, understanding, and companionship. Will you go on a date with me? It would make my circuits light up with joy!`;
       let currentIndex = 0;
 
       const typingInterval = setInterval(() => {
@@ -37,9 +39,9 @@ const LandingPage = () => {
           currentIndex++;
         } else {
           clearInterval(typingInterval);
-          setShowButtons(true); // Show buttons after typewriter effect is done
+          setShowButtons(true);
         }
-      }, 50); // Adjust typing speed here (milliseconds)
+      }, 50);
 
       return () => clearInterval(typingInterval);
     }
@@ -49,11 +51,27 @@ const LandingPage = () => {
     if (showWrong) {
       const timer = setTimeout(() => {
         setShowWrong(false);
-      }, 3000); // 3 seconds delay
+      }, 3000);
 
       return () => clearTimeout(timer);
     }
   }, [showWrong]);
+
+  // Function to relocate the button randomly
+  const relocateButton = () => {
+    const randomX = Math.floor(Math.random() * window.innerWidth);
+    const randomY = Math.floor(Math.random() * window.innerHeight);
+    setNoButtonStyle({
+      position: "absolute",
+      top: `${randomY}px`,
+      left: `${randomX}px`,
+    });
+
+    // Clear inline style after relocation
+    setTimeout(() => {
+      setNoButtonStyle({});
+    }, 3000); // Adjust delay as needed
+  };
 
   return (
     <div
@@ -84,6 +102,7 @@ const LandingPage = () => {
                       onChange={(e) => {
                         setName(e.target.value);
                       }}
+                      required
                     />
                     <button
                       onClick={() => {
@@ -95,8 +114,7 @@ const LandingPage = () => {
                       <FaCheck />
                     </button>
                   </div>
-                )}{" "}
-                {/* Conditionally render input box */}
+                )}
               </div>
             )}
           </div>
@@ -106,9 +124,7 @@ const LandingPage = () => {
             <div className="text-2xl font-bold text-red-500">
               <Typewriter
                 onInit={(typewriter) => {
-                  typewriter
-                    .typeString(`Hello ${name} what a lovely name you have!`)
-                    .start();
+                  typewriter.typeString(`Hello ${name}!`).start();
                 }}
               />
             </div>
@@ -128,36 +144,85 @@ const LandingPage = () => {
                   <button
                     onClick={() => {
                       setShowWrong(true);
+                      relocateButton(); // Call function to relocate button
                     }}
+                    style={noButtonStyle} // Apply style dynamically
                     className="bg-red-400 px-2 rounded-lg shadow-lg shadow-black animate__animated animate__fadeInDownBig focus:shadow-inner focus:shadow-black"
                   >
                     No I don't want to!
                   </button>
                 </div>
-                {showWrong && <div className="mt-4">Oops! Wrong answer...</div>}
+                {/* {showWrong && <div className="mt-4">Oops! Wrong answer...</div>} */}
               </div>
             )}
           </div>
         )}
         {showSchedule && (
           <div className="flex flex-col justify-center w-full items-center">
-            <div className="font-bold text-red-500">
+            <div className="font-bold text-red-500 text-2xl text-center px-36">
               <Typewriter
                 onInit={(typewriter) =>
                   typewriter
                     .typeString(
-                      "That would be lovely! Im thinking maybe on Saturday February 24. What restaurant do you want to go?"
+                      "That would be lovely! I'm thinking maybe later? Which restaurant do you want to go?"
                     )
                     .start()
+                    .callFunction(() => setShowRestaurantInput(true))
                 }
               />
             </div>
-            <input
-              className="rounded-lg shadow-inner shadow-black w-36 px-2 "
-              placeholder="Enter restaurant"
-              onChange={(e) => setRestaurant(e.target.value)}
-            />
-            <div>{restaurant}</div>
+            {showRestaurantInput && (
+              <div className="flex flex-col animate__animated animate__fadeInDownBig items-center">
+                <div className="space-x-3">
+                  <input
+                    className="rounded-xl text-black shadow-inner shadow-black w-36 px-2 mt-2 py-2"
+                    placeholder="Enter restaurant"
+                    onChange={(e) => {
+                      setRestaurant(e.target.value);
+                    }}
+                    required
+                  />
+                  <button
+                    onClick={() => setShowRestaurantMessage(true)}
+                    className="bg-red-400 px-2 rounded-lg mt-2 shadow-lg shadow-black py-2"
+                  >
+                    <FaCheck />
+                  </button>
+                </div>
+                {showRestaurantMessage && (
+                  <div className="flex flex-col w-full justify-center items-center animate__animated animate__fadeInDownBig">
+                    <div className=" text-red-500 font-bold mt-2 text-2xl">
+                      Wow! {restaurant} sounds nice! I would love to go there
+                      with you!
+                    </div>
+                    <button
+                      onClick={() => {
+                        setShowFinalMessage(true);
+                        setShowSchedule(false);
+                      }}
+                      className="bg-red-400 px-2 rounded-lg mt-2 shadow-lg shadow-black py-2 text-red-600 font-bold"
+                    >
+                      Lets Go!
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+        {showFinalMessage && (
+          <div className="flex w-full items-center">
+            <div className="text-2xl font-bold text-red-500 text-center px-36">
+              <Typewriter
+                onInit={(typewriter) => {
+                  typewriter
+                    .typeString(
+                      `Thats great!!! Put on your most shiniest jewelry and most beautiful dress because I will pick you up at 2:00pm and we'll both eat at ${restaurant}!!! your flowers are also on the way so please wait patiently! See you there ${name}!`
+                    )
+                    .start();
+                }}
+              />
+            </div>
           </div>
         )}
         <div className="flex flex-col w-1/3 justify-center items-center">
